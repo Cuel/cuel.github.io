@@ -53,6 +53,7 @@
           debug('selected:', item.component, item.file)
           this.term = this.getTerm(item)
           this.close()
+          this.$router.push({name: 'addons', params: {component: item.component, fnc: item.file}})
         },
         lookUpTerm: function () {
           if ((this.term || '').length < 2) {
@@ -165,19 +166,18 @@
     }, [])
 
     const Home = {
-      template: 'Search a function!'
+      template: '<div<Home!</div>'
     }
 
     const View = {
-      template: 'Hi! {{$route.param.component}} {{$route.param.fnc}}'
+      template: '<div>Hi! {{$route.param}}</div>'
     }
 
-    Vue.use(VueRouter)
     const router = new VueRouter({
-      mode: 'history',
+      mode: 'hash',
       routes: [
-        {path: '/', component: Home},
-        {path :'addons/:component/:fnc', component: View},
+        {name: 'home', path: '/', component: Home},
+        {name: 'addons', path :'/addons/:component/:fnc', component: View},
         {path: '*', redirect: '/'}
       ]
     })
@@ -185,20 +185,20 @@
     const app = new Vue({
       router,
       data: {
-        data: searchTerms
+        terms: searchTerms
       },
       template: `
         <section>
           <nav>
               <section class="search__container">
-                  <app-search :list="data"></app-search>
+                  <app-search :list="terms"></app-search>
               </section>    
           </nav>
 
           <article>
             <router-view></router-view>
           </article>
-        </section
+        </section>
       `
     }).$mount('#app')
   })
