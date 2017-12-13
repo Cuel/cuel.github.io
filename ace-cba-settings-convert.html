@@ -9,6 +9,13 @@
     <style>
         html {
             box-sizing: border-box;
+            height: 100%;
+        }
+
+        body {
+            position: relative;
+            min-height: 100%;
+            padding-bottom: 6rem;
         }
 
         *,
@@ -35,7 +42,7 @@
             display: flex;
             width: 50%;
             padding: 1em;
-            height: 80vh;
+            height: 70vh;
             overflow-y: scroll;
         }
 
@@ -43,6 +50,16 @@
             padding: 1em 4em;
             background-color: rgba(100, 200, 0, 1);
         }
+        footer {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            padding: 1rem;
+            text-align: center;
+        }
+
     </style>
 </head>
 
@@ -56,6 +73,10 @@
         </div>
         <pre><code id="error" style="color: red"></code></pre>
     </main>
+    <footer>
+        Made by cuel for ACE3. Using <a href="https://github.com/Fusselwurm/arma-class-parser" target="blank">arma-class-parser</a> by Fusselwurm
+    </footer>
+
     <script type="text/javascript">
         function coerceValue(value) {
             var setting = value.value != null ? value.value : 'UNKNOWN!'
@@ -79,8 +100,8 @@
             try {
                 var converted = parse(input.value)
             } catch (e) {
-                error.innerHTML = e.message
-                console.error(e)
+                error.textContent = e.message
+                console.error('failed to parse', e)
             }
 
             if (converted.ACE_Settings) converted = converted.ACE_Settings
@@ -112,5 +133,4 @@
         document.getElementById('convert').addEventListener('click', () => doit())
     </script>
 </body>
-
 </html>
