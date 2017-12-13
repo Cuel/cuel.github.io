@@ -78,59 +78,77 @@
     </footer>
 
     <script type="text/javascript">
-        function coerceValue(value) {
-            var setting = value.value != null ? value.value : 'UNKNOWN!'
-            switch (value.typeName) {
-                case 'BOOL':
-                    return setting === 1 ? true : false
-                case 'SCALAR':
-                    return setting
-                case 'COLOR':
-                    return '[' + setting + ']'
-                default:
-                    return setting
-            }
-        }
-
-        function doit() {
-            var error = document.getElementById('error')
-            error.innerHTML = ''
-            var input = document.getElementById('input')
-            var output = document.getElementById('output').firstChild
-            try {
-                var converted = parse(input.value)
-            } catch (e) {
-                error.textContent = e.message
-                console.error('failed to parse', e)
+        (function () {
+            Number.isNaN = Number.isNaN || function(value) {     
+                return value !== value;
             }
 
-            if (converted.ACE_Settings) converted = converted.ACE_Settings
+            function coerceValue(value) {
+                var setting = value.value != null ? value.value : 'UNKNOWN VALUE!'
+                if (Number.isNaN(setting)) {
+                    setting = 'UNKNOWN VALUE!'
+                }
 
-            var prev = ''
-            var out = []
-            Object.keys(converted)
-                .sort((a, b) => a.localeCompare(b))
-                .forEach(key => {
-                    var value = converted[key]
-                    var str = ''
-                    if (value.isClientSettable === 0) str += 'force '
-                    if (value.force === 1) str += 'force '
-                    str += key
-                    str += ' = ' + coerceValue(value) + ';'
+                switch (value.typeName) {
+                    case 'BOOL':
+                        return setting === 1 ? true : false
+                    case 'SCALAR':
+                        return setting
+                    case 'COLOR':
+                        return '[' + setting + ']'
+                    default:
+                        return setting
+                }
+            }
 
-                    var prevSplit = prev.split('_')
-                    var split = key.split('_')
-
-                    if (prev && prevSplit[0] !== split[0] || prevSplit[1] !== split[1]) {
-                        out.push('')
+            function doit() {
+                var error = document.getElementById('error')
+                error.innerHTML = ''
+                var input = document.getElementById('input')
+                var output = document.getElementById('output').firstChild
+                try {
+                    var converted = parse(input.value)
+                } catch (e) {
+                    if (e.message.slice(0,12) === 'undefined at') {
+                        error.textContent = 'Error parsing ' + e.message + '. missing semicolon?'
+                    } else {
+                        error.textContent = 'Error parsing ' + e.message
                     }
+                    console.error('failed to parse', e)
+                }
 
-                    out.push(str)
-                    prev = key
-                })
-            output.textContent = out.join('\n')
-        }
-        document.getElementById('convert').addEventListener('click', () => doit())
+                if (converted.ACE_Settings) {
+                    converted = converted.ACE_Settings
+                }
+
+                var prev = ''
+                var out = []
+                Object.keys(converted)
+                    .sort(function (a, b) {
+                        a.localeCompare(b)
+                    })
+                    .forEach(function (key) {
+                        var value = converted[key]
+                        var str = ''
+                        if (value.isClientSettable === 0) str += 'force '
+                        if (value.force === 1) str += 'force '
+                        str += key
+                        str += ' = ' + coerceValue(value) + ';'
+
+                        var prevSplit = prev.split('_')
+                        var split = key.split('_')
+
+                        if (prev && prevSplit[0] !== split[0] || prevSplit[1] !== split[1]) {
+                            out.push('')
+                        }
+
+                        out.push(str)
+                        prev = key
+                    })
+                output.textContent = out.join('\n')
+            }
+            document.getElementById('convert').addEventListener('click', doit)
+        }())
     </script>
 </body>
 </html>
