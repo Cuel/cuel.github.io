@@ -96,6 +96,8 @@
                         return setting
                     case 'COLOR':
                         return '[' + setting + ']'
+                    case 'STRING':
+                        return '"' + setting + '"'
                     default:
                         return setting
                 }
