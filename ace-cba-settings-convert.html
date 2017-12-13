@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ACE3 - CBA settings</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="https://cdn.rawgit.com/Fusselwurm/arma-class-parser/879f7888/class-parser.js"></script>
+    <style>
+        html {
+            box-sizing: border-box;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        main {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .btn-wrap {
+            width: 100%;
+            padding-top: 2em;
+            display: flex;
+            justify-content: center;
+        }
+
+        #input,
+        #output {
+            display: flex;
+            width: 50%;
+            padding: 1em;
+            height: 80vh;
+            overflow-y: scroll;
+        }
+
+        #convert {
+            padding: 1em 4em;
+            background-color: rgba(100, 200, 0, 1);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ACE - CBA settings converter</h1>
+    <main>
+        <textarea id="input" placeholder="ACE Settings from userconfig"></textarea>
+        <pre id="output"><code></code></pre>
+        <div class="btn-wrap">
+            <button id="convert" type="button">Convert</button>
+        </div>
+        <pre><code id="error" style="color: red"></code></pre>
+    </main>
+    <script type="text/javascript">
+        function coerceValue(value) {
+            var setting = value.value != null ? value.value : 'UNKNOWN!'
+            switch (value.typeName) {
+                case 'BOOL':
+                    return setting === 1 ? true : false
+                case 'SCALAR':
+                    return setting
+                case 'COLOR':
+                    return '[' + setting + ']'
+                default:
+                    return setting
+            }
+        }
+
+        function doit() {
+            var error = document.getElementById('error')
+            error.innerHTML = ''
+            var input = document.getElementById('input')
+            var output = document.getElementById('output').firstChild
+            try {
+                var converted = parse(input.value)
+            } catch (e) {
+                error.innerHTML = e.message
+                console.error(e)
+            }
+
+            if (converted.ACE_Settings) converted = converted.ACE_Settings
+
+            var prev = ''
+            var out = []
+            Object.keys(converted)
+                .sort((a, b) => a.localeCompare(b))
+                .forEach(key => {
+                    var value = converted[key]
+                    var str = ''
+                    if (value.isClientSettable === 0) str += 'force '
+                    if (value.force === 1) str += 'force '
+                    str += key
+                    str += ' = ' + coerceValue(value) + ';'
+
+                    var prevSplit = prev.split('_')
+                    var split = key.split('_')
+
+                    if (prev && prevSplit[0] !== split[0] || prevSplit[1] !== split[1]) {
+                        out.push('')
+                    }
+
+                    out.push(str)
+                    prev = key
+                })
+            output.textContent = out.join('\n')
+        }
+        document.getElementById('convert').addEventListener('click', () => doit())
+    </script>
+</body>
+
+</html>
